@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Spendwise — A personal finance dashboard to track income, expenses, and savings with beautiful charts and insights." />
+  <title>Spendwise — Personal Finance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="role-admin">
+
+  <!-- sidebar overlay -->
+  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <!-- sidebar -->
+  <aside id="sidebar">
+
+    <!-- this inner wrapper has overflow:hidden so nav text clips during collapse -->
+    <div class="sidebar-inner">
+
+      <div class="logo-area">
+        <div class="logo">
+          <div class="logo-mark">
+            <!-- <svg viewBox="0 0 24 24">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+              <polyline points="16 7 22 7 22 13" />
+            </svg> -->
+            <img src="zorvynfulllogolight.png" alt="">
+          </div>
+          <!-- <div class="logo-text">
+            <div class="logo-name">Spendwise</div>
+            <div class="logo-tag">Personal Finance</div>
+          </div> -->
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">Menu</div>
+        <button class="nav-link active" data-page="overview" data-tooltip="Overview" onclick="navigate(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+          </svg>
+          <span>Overview</span>
+        </button>
+        <button class="nav-link" data-page="transactions" data-tooltip="Transactions" onclick="navigate(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          <span>Transactions</span>
+        </button>
+        <button class="nav-link" data-page="insights" data-tooltip="Insights" onclick="navigate(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          <span>Insights</span>
+        </button>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="role-card">
+          <div class="role-card-label">Active Role</div>
+          <select class="role-select" onchange="setRole(this.value)">
+            <option value="admin">Admin</option>
+            <option value="viewer">Viewer</option>
+          </select>
+          <div class="role-badge admin" id="roleBadge"><span class="dot"></span> Administrator</div>
+        </div>
+        <button class="theme-btn" data-tooltip="Toggle theme" onclick="toggleTheme()">
+          <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <span id="themeLabel">Dark mode</span>
+        </button>
+      </div>
+
+    </div><!-- /.sidebar-inner -->
+
+    <!-- toggle pill sits on the right edge; absolute-positioned so it peeks out -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+    </button>
+
+  </aside>
+
+  <!-- MAIN -->
+  <div id="main">
+
+    <!-- MOBILE HEADER -->
+    <header id="mobile-header">
+      <span class="mobile-logo">Spendwise</span>
+      <div class="mobile-actions">
+        <button class="icon-btn" onclick="toggleTheme()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+        </button>
+        <button class="icon-btn" onclick="openSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div id="content">
+
+      <!-- OVERVIEW PAGE -->
+      <div class="page active" id="page-overview">
+        <div class="page-head">
+          <div>
+            <div class="page-title">Good morning 👋</div>
+            <div class="page-sub">Here's your financial summary for this month</div>
+          </div>
+          <div class="head-actions">
+            <button class="btn admin-only btn-primary" onclick="openModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Add Transaction
+            </button>
+            <button class="btn" onclick="exportCSV()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Export
+            </button>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <div class="section-grid">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Balance Trend</div>
+                <div class="card-sub">Cumulative net balance over time</div>
+              </div>
+              <select class="filter-select" style="font-size:12px;padding:6px 10px;" onchange="renderTrend(this.value)">
+                <option value="6">6 months</option>
+                <option value="12">12 months</option>
+              </select>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">By Category</div>
+                <div class="card-sub">Expense breakdown</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="donut-wrap"><canvas id="donutChart"></canvas></div>
+              <div class="cat-legend" id="catLegend"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Recent Transactions</div>
+              <div class="card-sub">Last 6 entries</div>
+            </div>
+            <button class="btn btn-sm" onclick="navigateTo('transactions')">See all →</button>
+          </div>
+          <div class="tx-list" id="recentList"></div>
+        </div>
+      </div>
+
+      <!-- TRANSACTIONS PAGE -->
+      <div class="page" id="page-transactions">
+        <div class="page-head">
+          <div>
+            <div class="page-title">Transactions</div>
+            <div class="page-sub">All your financial activity in one place</div>
+          </div>
+          <div class="head-actions">
+            <button class="btn admin-only btn-primary" onclick="openModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Add
+            </button>
+            <button class="btn" onclick="exportCSV()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Export
+            </button>
+          </div>
+        </div>
+
+        <div class="filters-bar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input class="search-input" id="searchInput" placeholder="Search by name or category…"
+              oninput="renderTxTable()" />
+          </div>
+          <select class="filter-select" id="filterType" onchange="renderTxTable()">
+            <option value="">All types</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+          <select class="filter-select" id="filterCat" onchange="renderTxTable()">
+            <option value="">All categories</option>
+          </select>
+          <select class="filter-select" id="filterMonth" onchange="renderTxTable()">
+            <option value="">All months</option>
+          </select>
+          <span class="viewer-notice">View-only mode</span>
+        </div>
+
+        <div class="card">
+          <div class="tx-table-wrap">
+            <table class="tx-table">
+              <thead>
+                <tr>
+                  <th onclick="sortBy('date')" id="thDate">Date <i class="sort-icon">↕</i></th>
+                  <th>Description</th>
+                  <th onclick="sortBy('cat')" id="thCat">Category <i class="sort-icon">↕</i></th>
+                  <th onclick="sortBy('type')" id="thType">Type <i class="sort-icon">↕</i></th>
+                  <th onclick="sortBy('amount')" id="thAmt">Amount <i class="sort-icon">↕</i></th>
+                  <th class="admin-only">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="txBody"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="pg-info" id="pgInfo"></span>
+            <div class="pg-btns" id="pgBtns"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INSIGHTS PAGE -->
+      <div class="page" id="page-insights">
+        <div class="page-head">
+          <div>
+            <div class="page-title">Insights</div>
+            <div class="page-sub">Understand your spending patterns</div>
+          </div>
+        </div>
+
+        <div class="insights-top" id="insightsTop"></div>
+
+        <div class="section-grid">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Income vs Expenses</div>
+                <div class="card-sub">Last 6 months comparison</div>
+              </div>
+              <div style="display:flex;gap:12px;font-size:12px;align-items:center;">
+                <span style="display:flex;align-items:center;gap:5px;color:var(--text2)"><span
+                    style="width:10px;height:10px;border-radius:3px;background:var(--green);display:inline-block;"></span>Income</span>
+                <span style="display:flex;align-items:center;gap:5px;color:var(--text2)"><span
+                    style="width:10px;height:10px;border-radius:3px;background:var(--red);display:inline-block;"></span>Expense</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div style="height:230px;position:relative;"><canvas id="monthlyChart"></canvas></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Spending Breakdown</div>
+                <div class="card-sub">All time by category</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="spend-list" id="spendList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+
+    <!-- MOBILE BOTTOM NAV -->
+    <nav id="bottom-nav">
+      <div class="bn-wrap">
+        <button class="bn-item active" data-page="overview" onclick="navigate(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+          </svg>
+          <span>Overview</span>
+        </button>
+        <button class="bn-item" data-page="transactions" onclick="navigate(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          <span>Transactions</span>
+        </button>
+        <button class="bn-add admin-only" onclick="openModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
+        <button class="bn-item" data-page="insights" onclick="navigate(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          <span>Insights</span>
+        </button>
+        <button class="bn-item" onclick="openSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="1" />
+            <circle cx="19" cy="12" r="1" />
+            <circle cx="5" cy="12" r="1" />
+          </svg>
+          <span>More</span>
+        </button>
+      </div>
+    </nav>
+
+  </div><!-- /main -->
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="modal-head">
+        <span class="modal-title" id="modalTitle">Add Transaction</span>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-select" id="fType" onchange="refreshCatOptions()">
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount (₹)</label>
+            <input type="number" class="form-input" id="fAmount" placeholder="0" min="0" step="1" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <input type="text" class="form-input" id="fDesc" placeholder="e.g. Monthly salary, Grocery run…" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select" id="fCat"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-input" id="fDate" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTransaction()">Save Transaction</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast">
+    <div class="toast-inner" id="toastInner"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
