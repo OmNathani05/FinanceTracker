@@ -1,4 +1,3 @@
-// category colors + emoji mapping — add new ones here if you add categories
 const CAT_COLORS = {
   'Food & Dining': '#E8803A', 'Transport': '#3A8EE8', 'Shopping': '#9B5DE5',
   'Entertainment': '#F4A261', 'Healthcare': '#2CB67D', 'Utilities': '#5EAAA8',
@@ -13,7 +12,6 @@ const CAT_EMOJIS = {
 const EXP_CATS = ['Food & Dining', 'Transport', 'Shopping', 'Entertainment', 'Healthcare', 'Utilities', 'Rent', 'Travel', 'Education', 'Other'];
 const INC_CATS = ['Salary', 'Freelance', 'Investment', 'Other'];
 
-// seed data — 60 transactions across 6 months, loaded once if localStorage is empty
 const SEED = [
   { id: 1, date: '2025-10-03', desc: 'Monthly Salary', cat: 'Salary', type: 'income', amount: 85000 },
   { id: 2, date: '2025-10-05', desc: "Grocery — Nature's Basket", cat: 'Food & Dining', type: 'expense', amount: 3200 },
@@ -77,7 +75,6 @@ const SEED = [
   { id: 60, date: '2026-03-28', desc: 'Investment dividend', cat: 'Investment', type: 'income', amount: 6500 },
 ];
 
-// app state
 let txs = JSON.parse(localStorage.getItem('sw_txs') || 'null') || SEED.map(t => ({ ...t }));
 let nextId = Math.max(...txs.map(t => t.id)) + 1;
 let sortState = { col: 'date', dir: -1 };
@@ -86,7 +83,6 @@ const PER_PAGE = 10;
 let editingId = null;
 let trendInst, donutInst, monthlyInst;
 
-// small helpers used all over
 const persist = () => localStorage.setItem('sw_txs', JSON.stringify(txs));
 const fmtINR = n => '₹' + Math.abs(n).toLocaleString('en-IN');
 const fmtK = n => n >= 100000 ? '₹' + (n / 100000).toFixed(1) + 'L' : n >= 1000 ? '₹' + (n / 1000).toFixed(1) + 'K' : '₹' + n;
@@ -100,7 +96,6 @@ function showToast(msg, icon = '✓') {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// navigation — swaps the active page and syncs both nav bars
 function navigate(el) {
   const page = el.dataset.page;
   document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
@@ -120,7 +115,6 @@ function navigateTo(page) {
   if (el) navigate(el);
 }
 
-// sidebar open/close/toggle
 function openSidebar() {
   document.getElementById('sidebar').classList.add('open');
   document.getElementById('sidebar-overlay').classList.add('show');
@@ -137,12 +131,14 @@ function toggleSidebar() {
   localStorage.setItem('sw_sidebar', isCollapsed ? 'collapsed' : 'expanded');
 }
 
-// role switcher + dark/light theme toggle
 function setRole(role) {
   document.body.className = 'role-' + role;
   const badge = document.getElementById('roleBadge');
   badge.className = 'role-badge ' + role;
   badge.innerHTML = `<span class="dot"></span> ${role === 'admin' ? 'Administrator' : 'Viewer'}`;
+  if (document.getElementById('page-transactions').classList.contains('active')) {
+    renderTxTable();
+  }
 }
 
 function toggleTheme() {
@@ -156,7 +152,6 @@ function toggleTheme() {
   }, 50);
 }
 
-// data helpers — slice by month, build chart datasets, category totals
 function getMonthTxs(ago) {
   const now = new Date();
   const d = new Date(now.getFullYear(), now.getMonth() - ago, 1);
@@ -188,7 +183,6 @@ function getCatBreakdown() {
   return Object.entries(map).sort((a, b) => b[1] - a[1]);
 }
 
-// overview page renderers
 function renderOverview() {
   renderStats();
   renderTrend(6);
@@ -308,7 +302,6 @@ function renderRecent() {
   `).join('');
 }
 
-// transactions page — filters, sort, paginate, render table
 function populateFilters() {
   const cats = [...new Set(txs.map(t => t.cat))].sort();
   const months = [...new Set(txs.map(t => t.date.slice(0, 7)))].sort().reverse();
@@ -442,7 +435,6 @@ function editTx(id) {
   document.getElementById('modalOverlay').classList.add('open');
 }
 
-// modal — add and edit transactions
 function openModal() {
   editingId = null;
   document.getElementById('modalTitle').textContent = 'Add Transaction';
@@ -488,7 +480,6 @@ function saveTransaction() {
   renderOverview();
 }
 
-// insights page
 function renderInsights() {
   const cats = getCatBreakdown();
   const top = cats[0] || ['—', 0];
@@ -528,7 +519,6 @@ function renderInsights() {
     </div>
   `;
 
-  // Monthly bar chart
   const { labels: ml, incomes: mi, expenses: me } = getMonthlyData(6);
   const isDark = document.documentElement.dataset.theme === 'dark';
   const mCtx = document.getElementById('monthlyChart');
@@ -561,7 +551,6 @@ function renderInsights() {
     });
   }
 
-  // Spend breakdown bars
   const total = cats.reduce((s, c) => s + c[1], 0);
   document.getElementById('spendList').innerHTML = cats.slice(0, 8).map(([cat, amt]) => `
     <div class="spend-row">
@@ -580,7 +569,6 @@ function renderInsights() {
   `).join('');
 }
 
-// csv export — exports whatever is currently visible (filtered or all)
 function exportCSV() {
   const data = document.getElementById('page-transactions').classList.contains('active') ? getFiltered() : txs;
   const rows = [
@@ -589,23 +577,36 @@ function exportCSV() {
   ];
   const a = document.createElement('a');
   a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(rows.map(r => r.join(',')).join('\n'));
-  a.download = 'spendwise_export.csv';
+  a.download = 'finance_tracker_export.csv';
   a.click();
   showToast('CSV exported successfully', '📥');
 }
 
-// kick everything off
+const HEADLINE_WORDS = ['Track.', 'Save.', 'Invest.', 'Budget.', 'Grow.', 'Analyse.', 'Plan.', 'Prosper.'];
+let _hlIndex = 0;
+
+function cycleHeadlineWord() {
+  const el = document.getElementById('greetingWord');
+  if (!el) return;
+  el.classList.add('flip-out');
+  setTimeout(() => {
+    _hlIndex = (_hlIndex + 1) % HEADLINE_WORDS.length;
+    el.textContent = HEADLINE_WORDS[_hlIndex];
+    el.classList.remove('flip-out');
+    void el.offsetWidth;
+  }, 350);
+}
+
 (function init() {
-  // Restore theme
   const savedTheme = localStorage.getItem('sw_theme');
   if (savedTheme) {
     document.documentElement.dataset.theme = savedTheme;
     if (savedTheme === 'dark') document.getElementById('themeLabel').textContent = 'Light mode';
   }
-  // Restore sidebar collapsed state (desktop only)
   if (window.innerWidth > 768 && localStorage.getItem('sw_sidebar') === 'collapsed') {
     document.getElementById('sidebar').classList.add('collapsed');
     document.getElementById('main').classList.add('sidebar-collapsed');
   }
+  setInterval(cycleHeadlineWord, 3500);
   renderOverview();
 })();

@@ -1,4 +1,4 @@
-# Spendwise — Personal Finance Dashboard
+# Finance Tracker — Personal Finance Dashboard
 
 A clean, responsive, client-side personal finance dashboard to track income, expenses, savings, and spending insights — built with vanilla HTML, CSS, and JavaScript.
 
