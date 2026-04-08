@@ -1294,6 +1294,9 @@ body {
   border-color: var(--accent);
   box-shadow: 0 2px 8px rgba(124, 92, 252, 0.4);
 }
+.pg-btn.active:hover {
+  color: #fff;
+}
 
 .pg-btn:disabled {
   opacity: 0.3;
